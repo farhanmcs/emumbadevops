@@ -1,4 +1,4 @@
-# minikube-devops
+# Emumba-Assignment
 
 This is the base Version of assignment and work on it is still in progress.
 For now the basic Deployments, Services and ConfigMaps are created.
