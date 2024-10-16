@@ -19,3 +19,10 @@ spec:
         image: farhandockerk8/simple-microservice-example-quotes:v1
         ports:
         - containerPort: 5000
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: qoute

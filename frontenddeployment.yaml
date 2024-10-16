@@ -22,3 +22,10 @@ spec:
         envFrom:
         - configMapRef:
             name: frontend-configmap
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: frontend-app
