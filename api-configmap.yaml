@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: api-configmap
 data:
-  QUOTES_API: http://quotes:5000
-  API_GATEWAY: http://192.168.100.7
+  QUOTES_API: http://quote-service.default.svc.cluster.local:5000
+  API_GATEWAY: http://apigateway-service.default.svc.cluster.local:3000
