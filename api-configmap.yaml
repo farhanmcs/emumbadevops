@@ -4,3 +4,4 @@ metadata:
   name: api-configmap
 data:
   QUOTES_API: http://quotes:5000
+  API_GATEWAY: http://192.168.100.7
