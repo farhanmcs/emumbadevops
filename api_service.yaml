@@ -11,3 +11,4 @@ spec:
       # By default and for convenience, the `targetPort` is set to
       # the same value as the `port` field.
       targetPort: 3000
+  sessionAffinity: ClientIP

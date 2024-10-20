@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: frontend-micro-service
-        image: farhandockerk8/simple-microservice-example-frontend:v1
+        image: farhandockerk8/simple-microservice-example-frontend:v8
         ports:
         - containerPort: 80
         envFrom:
@@ -37,10 +37,13 @@ spec:
             port: 80
           initialDelaySeconds: 3
           periodSeconds: 3
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app: frontend-app
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - frontend-app
+            topologyKey: "kubernetes.io/hostname"

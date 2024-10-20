@@ -37,10 +37,13 @@ spec:
             port: 3000
           initialDelaySeconds: 3
           periodSeconds: 3
-      topologySpreadConstraints:
-        - maxSkew: 3
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              app: api-gateway
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - api-gateway
+            topologyKey: "kubernetes.io/hostname"
