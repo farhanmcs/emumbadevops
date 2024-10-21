@@ -1,0 +1,277 @@
+apiVersion: v1
+data:
+  API_GATEWAY: http://apigateway-service.default.svc.cluster.local:3000
+  QUOTES_API: http://quote-service.default.svc.cluster.local:5000
+kind: ConfigMap
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: api-configmap
+  namespace: development
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: apigateway-service
+  namespace: development
+spec:
+  ports:
+  - port: 3000
+    targetPort: 3000
+  selector:
+    app: qoutes_api_app
+  sessionAffinity: ClientIP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: frontend-service
+  namespace: development
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: qoutes_api_app
+  sessionAffinity: ClientIP
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: quote-service
+  namespace: development
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+  selector:
+    app: qoutes_api_app
+  sessionAffinity: ClientIP
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: api-deployment
+  namespace: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qoutes_api_app
+  template:
+    metadata:
+      labels:
+        app: qoutes_api_app
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - api-gateway
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: api-configmap
+        image: farhandockerk8/simple-microservice-example-api:v1
+        livenessProbe:
+          httpGet:
+            path: /api/status
+            port: 3000
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        name: api-service
+        ports:
+        - containerPort: 3000
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /api/status
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: frontend-deployment
+  namespace: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qoutes_api_app
+  template:
+    metadata:
+      labels:
+        app: qoutes_api_app
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - frontend-app
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: api-configmap
+        image: farhandockerk8/simple-microservice-example-frontend:v8
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        name: frontend-micro-service
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: quote-deployment
+  namespace: development
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qoutes_api_app
+  template:
+    metadata:
+      labels:
+        app: qoutes_api_app
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - quote
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: api-configmap
+        image: farhandockerk8/simple-microservice-example-quotes:v1
+        livenessProbe:
+          httpGet:
+            path: /api/quote
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        name: quote-micro-service
+        ports:
+        - containerPort: 5000
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /api/quote
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: apigateway-hpa
+  namespace: development
+spec:
+  maxReplicas: 3
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 70
+        type: Utilization
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-deployment
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: frontend-hpa
+  namespace: development
+spec:
+  maxReplicas: 4
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 70
+        type: Utilization
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend-deployment
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: qoutes_api_app
+  name: quote-hpa
+  namespace: development
+spec:
+  maxReplicas: 3
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 70
+        type: Utilization
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: quote-deployment

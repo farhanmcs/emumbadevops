@@ -1,11 +1,22 @@
 # Emumba-Assignment
 
-This is the base Version of assignment and work on it is still in progress.
-For now the basic Deployments, Services and ConfigMaps are created.
-Also for this version Minikube is needed to be installed on the System.
-I have created docker images from preovided code repo and pushed them into my personal Docker Hub account and the Deployment files in this repo are fetching container images from there.
+Part 1 of te assignment is completed and following resources are created
 
-Please clone the repo and "cd" into it.
-Once in the directory you can see a set of Yaml files. Please run the following command in this directotory.
+1. 3 Deployments
+2. 3 Services
+3. 1 Config Map
+4. 3 Horizontal Pod Autoscalers
+5. Liveness & Rediness Probes
+6. Pod Anti Affinity for Pod distribution
+7. Resource Quotas
+8. Limit Ranges
+9. Namespace "development"
+10. Kustomize Package
 
-"kubectl create -f ."
+Please create a new name space "development" as follows"
+
+kubectl create namespace development
+
+Then create/apply "kustomize_package.yaml". It will create all the required resources as follows:
+
+kubectl apply -f kustomize_package.yaml

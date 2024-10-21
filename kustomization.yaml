@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: app_kustomize
+  namespace: development
+commonLabels:
+  app: qoutes_api_app
+resources:
+- apideployment.yaml
+- quotedeployment.yaml
+- frontenddeployment.yaml
+- api_service.yaml
+- frontend_service.yaml
+- quote_service.yaml
+- api-configmap.yaml
+- api_hpa.yaml
+- quote_hpa.yaml
+- frontend_hpa.yaml
+#- resourcequota_app.yaml
+#- limitrange_app.yaml

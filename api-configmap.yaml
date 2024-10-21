@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: api-configmap
+  namespace: development
 data:
   QUOTES_API: http://quote-service.default.svc.cluster.local:5000
   API_GATEWAY: http://apigateway-service.default.svc.cluster.local:3000
