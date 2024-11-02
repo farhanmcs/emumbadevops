@@ -16,5 +16,5 @@ resources:
 - api_hpa.yaml
 - quote_hpa.yaml
 - frontend_hpa.yaml
-#- resourcequota_app.yaml
-#- limitrange_app.yaml
+- resourcequota_app.yaml
+- limitrange_app.yaml
